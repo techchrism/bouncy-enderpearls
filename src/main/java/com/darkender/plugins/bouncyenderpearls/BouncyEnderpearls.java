@@ -1,5 +1,6 @@
 package com.darkender.plugins.bouncyenderpearls;
 
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.entity.EnderPearl;
@@ -87,9 +88,17 @@ public class BouncyEnderpearls extends JavaPlugin implements Listener
             EnderPearl old = (EnderPearl) event.getEntity();
             
             // End the bounces if hit an entity
+            Vector n;
             if(event.getHitEntity() != null)
             {
-                return;
+                // Treat the plane orthogonal to the vector between the pearl and the entity as a solid plane to bounce off of
+                n = old.getLocation().toVector()
+                        .subtract(event.getHitEntity().getBoundingBox().getCenter())
+                        .normalize();
+            }
+            else
+            {
+                n = event.getHitBlockFace().getDirection();
             }
             
             PersistentDataContainer data = old.getPersistentDataContainer();
@@ -110,8 +119,6 @@ public class BouncyEnderpearls extends JavaPlugin implements Listener
                 }
             }
             
-            
-            Vector n = event.getHitBlockFace().getDirection();
             Vector reflection = old.getVelocity().clone().subtract(
                     n.multiply(2 * old.getVelocity().dot(n))).multiply(bounciness);
             
