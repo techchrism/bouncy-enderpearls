@@ -1,0 +1,19 @@
+name: BouncyEnderpearls
+description: Hell
+version: 1.0.0
+main: com.darkender.plugins.bouncyenderpearls.BouncyEnderpearls
+api-version: 1.14
+author: Techdoodle
+
+commands:
+  bouncyenderpearls:
+    aliases: bep
+    description: Reload the BouncyEnderpearls config
+    permission: bouncyenderpearls.reload
+
+permissions:
+  bouncyenderpearls.enabled:
+    description: Denying this permission will cause enderpearls to behave normally
+    default: true
+  bouncyenderpearls.reload:
+    description: Permission to reload the config
