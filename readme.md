@@ -1,4 +1,5 @@
 ![Demonstration GIF](https://i.imgur.com/1nHwYnp.gif)
+
 A simple plugin that makes enderpearls bounce off of surfaces when they would normally teleport the player. Lots of fun for non-serious gameplay, absolute garbage for serious gameplay.
 
 Permissions:

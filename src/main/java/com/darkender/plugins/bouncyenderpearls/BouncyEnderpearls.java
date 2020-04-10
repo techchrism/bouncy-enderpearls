@@ -15,14 +15,14 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class BouncyEnderpearls extends JavaPlugin implements Listener
 {
     private NamespacedKey bounces;
-    private List<UUID> allowed = new ArrayList<UUID>();
+    private final Set<UUID> allowed = new HashSet<>();
     
     private double bounciness = 0.8;
     private int maxBounces = 5;
@@ -47,6 +47,7 @@ public class BouncyEnderpearls extends JavaPlugin implements Listener
     @EventHandler
     public void onTeleport(PlayerTeleportEvent event)
     {
+        // This event is called before the "onProjectileHit" event so a set is needed
         if(event.getCause() == PlayerTeleportEvent.TeleportCause.ENDER_PEARL)
         {
             if(allowed.contains(event.getPlayer().getUniqueId()))
@@ -63,12 +64,16 @@ public class BouncyEnderpearls extends JavaPlugin implements Listener
     @EventHandler
     public void onProjectileLaunch(ProjectileLaunchEvent event)
     {
+        // Check if it's a player firing an enderpearl
         if(event.getEntityType() == EntityType.ENDER_PEARL && event.getEntity().getShooter() instanceof Player)
         {
             Player p = (Player) event.getEntity().getShooter();
+            // If they don't have permission, ensure the destination teleport behaves normally
             if(!p.hasPermission("bouncyenderpearls.enabled"))
             {
+                // Make this the last teleport
                 allowed.add(p.getUniqueId());
+                // Make this the last bounce
                 event.getEntity().getPersistentDataContainer().set(bounces, PersistentDataType.INTEGER, maxBounces + 1);
             }
         }
@@ -80,6 +85,8 @@ public class BouncyEnderpearls extends JavaPlugin implements Listener
         if(event.getEntityType() == EntityType.ENDER_PEARL)
         {
             EnderPearl old = (EnderPearl) event.getEntity();
+            
+            // End the bounces if hit an entity
             if(event.getHitEntity() != null)
             {
                 return;
