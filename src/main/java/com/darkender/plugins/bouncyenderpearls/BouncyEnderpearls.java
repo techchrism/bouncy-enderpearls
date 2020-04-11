@@ -33,7 +33,9 @@ public class BouncyEnderpearls extends JavaPlugin implements Listener
     {
         bounces = new NamespacedKey(this, "bounces");
         getServer().getPluginManager().registerEvents(this, this);
-        getCommand("bouncyenderpearls").setExecutor(new BEPCommand(this));
+        BEPCommand bepCommand = new BEPCommand(this);
+        getCommand("bouncyenderpearls").setExecutor(bepCommand);
+        getCommand("bouncyenderpearls").setTabCompleter(bepCommand);
         reload();
     }
     
@@ -87,7 +89,7 @@ public class BouncyEnderpearls extends JavaPlugin implements Listener
         {
             EnderPearl old = (EnderPearl) event.getEntity();
             
-            // End the bounces if hit an entity
+            // The vector to "bounce" off of
             Vector n;
             if(event.getHitEntity() != null)
             {
@@ -106,6 +108,7 @@ public class BouncyEnderpearls extends JavaPlugin implements Listener
             if(data.has(bounces, PersistentDataType.INTEGER))
             {
                 bounceCount = data.get(bounces, PersistentDataType.INTEGER);
+                // Allow the player to teleport if it's the last bounce
                 if(bounceCount == maxBounces)
                 {
                     if(old.getShooter() instanceof Player)
@@ -123,8 +126,14 @@ public class BouncyEnderpearls extends JavaPlugin implements Listener
                     n.multiply(2 * old.getVelocity().dot(n))).multiply(bounciness);
             
             EnderPearl pearlNew = old.getWorld().spawn(old.getLocation(), EnderPearl.class);
-            pearlNew.setVelocity(reflection);
             pearlNew.setShooter(old.getShooter());
+            old.remove();
+            
+            // Launch the event for other plugins to use
+            ProjectileLaunchEvent launchEvent = new ProjectileLaunchEvent(pearlNew);
+            Bukkit.getPluginManager().callEvent(launchEvent);
+            
+            pearlNew.setVelocity(reflection);
             PersistentDataContainer newData = pearlNew.getPersistentDataContainer();
             newData.set(bounces, PersistentDataType.INTEGER,bounceCount + 1);
             

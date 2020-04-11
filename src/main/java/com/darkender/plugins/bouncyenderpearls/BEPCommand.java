@@ -3,20 +3,31 @@ package com.darkender.plugins.bouncyenderpearls;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 
-public class BEPCommand implements CommandExecutor
+import java.util.ArrayList;
+import java.util.List;
+
+public class BEPCommand implements CommandExecutor, TabCompleter
 {
-    private BouncyEnderpearls base;
+    private final BouncyEnderpearls base;
     
     public BEPCommand(BouncyEnderpearls base)
     {
         this.base = base;
     }
     
-    public boolean onCommand(CommandSender commandSender, Command command, String label, String[] strings)
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
     {
         base.reload();
-        commandSender.sendMessage("Reloaded the config");
+        sender.sendMessage("Reloaded the config");
         return true;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args)
+    {
+        return new ArrayList<>();
     }
 }
