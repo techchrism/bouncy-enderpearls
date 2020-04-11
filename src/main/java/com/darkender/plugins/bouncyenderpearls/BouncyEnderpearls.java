@@ -27,6 +27,11 @@ public class BouncyEnderpearls extends JavaPlugin implements Listener
     
     private double bounciness = 0.8;
     private int maxBounces = 5;
+    private boolean bounceSoundEnabled;
+    private Sound bounceSound;
+    private float bounceSoundVolume;
+    private float bounceSoundPitch;
+    private HashSet<String> disabledWorlds;
     
     @Override
     public void onEnable()
@@ -43,8 +48,25 @@ public class BouncyEnderpearls extends JavaPlugin implements Listener
     {
         saveDefaultConfig();
         reloadConfig();
+        getConfig().options().copyDefaults(true);
+        saveConfig();
+        
         bounciness = getConfig().getDouble("bounciness");
         maxBounces = getConfig().getInt("max-bounces");
+        bounceSoundEnabled = getConfig().getBoolean("bounce-sound.enabled");
+        bounceSound = Sound.BLOCK_SLIME_BLOCK_FALL;
+        try
+        {
+            bounceSound = Sound.valueOf(getConfig().getString("bounce-sound.name"));
+        }
+        catch(Exception e)
+        {
+            Bukkit.getLogger().info(getConfig().getString("bounce-sound.name") + " is not a valid sound name!");
+        }
+        bounceSoundVolume = (float) getConfig().getDouble("bounce-sound.volume");
+        bounceSoundPitch = (float) getConfig().getDouble("bounce-sound.pitch");
+        disabledWorlds = new HashSet<>();
+        disabledWorlds.addAll(getConfig().getStringList("disabled-worlds"));
     }
     
     @EventHandler
@@ -71,8 +93,8 @@ public class BouncyEnderpearls extends JavaPlugin implements Listener
         if(event.getEntityType() == EntityType.ENDER_PEARL && event.getEntity().getShooter() instanceof Player)
         {
             Player p = (Player) event.getEntity().getShooter();
-            // If they don't have permission, ensure the destination teleport behaves normally
-            if(!p.hasPermission("bouncyenderpearls.enabled"))
+            // If they don't have permission of if in a disabled world, ensure the destination teleport behaves normally
+            if(!p.hasPermission("bouncyenderpearls.enabled") || disabledWorlds.contains(p.getWorld().getName()))
             {
                 // Make this the last teleport
                 allowed.add(p.getUniqueId());
@@ -137,7 +159,10 @@ public class BouncyEnderpearls extends JavaPlugin implements Listener
             PersistentDataContainer newData = pearlNew.getPersistentDataContainer();
             newData.set(bounces, PersistentDataType.INTEGER,bounceCount + 1);
             
-            pearlNew.getWorld().playSound(pearlNew.getLocation(), Sound.BLOCK_SLIME_BLOCK_FALL, 1F, 1F);
+            if(bounceSoundEnabled)
+            {
+                pearlNew.getWorld().playSound(pearlNew.getLocation(), bounceSound, bounceSoundVolume, bounceSoundPitch);
+            }
         }
     }
 }
