@@ -2,7 +2,7 @@ name: BouncyEnderpearls
 description: Hell
 version: ${project.version}
 main: com.darkender.plugins.bouncyenderpearls.BouncyEnderpearls
-api-version: 1.15
+api-version: 1.14
 author: Techdoodle
 
 commands:
